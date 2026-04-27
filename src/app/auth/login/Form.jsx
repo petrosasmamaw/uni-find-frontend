@@ -27,7 +27,12 @@ export default function LoginForm() {
       });
 
       if (signInError) {
-        setError(signInError.message || "Incorrect email or password");
+        const status = Number(signInError.status || 0);
+        if (status >= 500) {
+          setError("Server error during sign-in. Please try again in a minute.");
+        } else {
+          setError(signInError.message || "Incorrect email or password");
+        }
         setLoading(false);
         return;
       }

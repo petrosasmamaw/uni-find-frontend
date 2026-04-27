@@ -29,6 +29,7 @@ function resolveBaseUrl() {
     const candidates = [
         process.env.BETTER_AUTH_URL,
         process.env.NEXT_PUBLIC_AUTH_BASE_URL,
+        process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
         process.env.URL,
         process.env.DEPLOY_PRIME_URL,
         process.env.DEPLOY_URL,
@@ -46,17 +47,26 @@ function resolveBaseUrl() {
 }
 
 const baseURL = resolveBaseUrl();
+const trustedOriginEnv = [
+    process.env.BETTER_AUTH_TRUSTED_ORIGINS,
+    process.env.BETTER_AUTH_TRUSTED_ORIGIN,
+    process.env.TRUSTED_ORIGINS,
+]
+    .filter(Boolean)
+    .join(",");
+
 const trustedOrigins = Array.from(
     new Set(
         [
             getOriginFromUrl(baseURL),
             getOriginFromUrl(process.env.BETTER_AUTH_URL),
             getOriginFromUrl(process.env.NEXT_PUBLIC_AUTH_BASE_URL),
+            getOriginFromUrl(process.env.NEXT_PUBLIC_BETTER_AUTH_URL),
             getOriginFromUrl(process.env.URL),
             getOriginFromUrl(process.env.DEPLOY_PRIME_URL),
             getOriginFromUrl(process.env.DEPLOY_URL),
             "http://localhost:3000",
-            ...parseTrustedOrigins(process.env.BETTER_AUTH_TRUSTED_ORIGINS),
+            ...parseTrustedOrigins(trustedOriginEnv),
         ].filter(Boolean)
     )
 );

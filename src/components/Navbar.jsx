@@ -7,9 +7,14 @@ export default async function Navbar() {
   const headersList = await headers();
   const cookieHeader = headersList.get("cookie") || "";
 
-  const session = await auth.api.getSession({
-    headers: { cookie: cookieHeader },
-  });
+  let session = null;
+  try {
+    session = await auth.api.getSession({
+      headers: { cookie: cookieHeader },
+    });
+  } catch (error) {
+    console.error("Failed to resolve auth session in Navbar:", error);
+  }
 
   return (
     <header className="w-full py-3 sm:py-3 md:py-4 bg-white overflow-x-auto">

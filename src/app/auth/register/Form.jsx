@@ -27,7 +27,12 @@ export default function RegisterForm() {
       });
 
       if (signUpError) {
-        setError(signUpError.message || "Registration failed");
+        const status = Number(signUpError.status || 0);
+        if (status >= 500) {
+          setError("Server error during registration. Please try again in a minute.");
+        } else {
+          setError(signUpError.message || "Registration failed");
+        }
         setLoading(false);
         return;
       }
