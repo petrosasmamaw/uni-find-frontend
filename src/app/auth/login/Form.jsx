@@ -20,15 +20,14 @@ export default function LoginForm() {
     const form = new FormData(e.currentTarget);
     const body = Object.fromEntries(form.entries());
     try {
-      const resp = await fetch("/api/auth/sign-in/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(body),
+      const { error: signInError } = await authClient.signIn.email({
+        email: body.email,
+        password: body.password,
+        callbackURL: "/",
       });
-      const data = await resp.json().catch(() => null);
-      if (!resp.ok || data?.error) {
-        setError(data?.error?.message || data?.message || "Incorrect email or password");
+
+      if (signInError) {
+        setError(signInError.message || "Incorrect email or password");
         setLoading(false);
         return;
       }

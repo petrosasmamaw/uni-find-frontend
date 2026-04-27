@@ -19,15 +19,15 @@ export default function RegisterForm() {
     const form = new FormData(e.currentTarget);
     const body = Object.fromEntries(form.entries());
     try {
-      const resp = await fetch("/api/auth/sign-up/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(body),
+      const { error: signUpError } = await authClient.signUp.email({
+        name: body.name,
+        email: body.email,
+        password: body.password,
+        callbackURL: "/",
       });
-      const data = await resp.json().catch(() => null);
-      if (!resp.ok || data?.error) {
-        setError(data?.error?.message || data?.message || "Registration failed");
+
+      if (signUpError) {
+        setError(signUpError.message || "Registration failed");
         setLoading(false);
         return;
       }

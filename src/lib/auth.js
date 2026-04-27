@@ -8,15 +8,64 @@ import { getVerificationEmailTemplate, getPasswordResetEmailTemplate } from "./e
 
 const prisma = new PrismaClient();
 
+function parseTrustedOrigins(value) {
+    if (!value) return [];
+    return value
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean);
+}
+
+function getOriginFromUrl(url) {
+    if (!url) return null;
+    try {
+        return new URL(url).origin;
+    } catch {
+        return null;
+    }
+}
+
+function resolveBaseUrl() {
+    const candidates = [
+        process.env.BETTER_AUTH_URL,
+        process.env.NEXT_PUBLIC_AUTH_BASE_URL,
+        process.env.URL,
+        process.env.DEPLOY_PRIME_URL,
+        process.env.DEPLOY_URL,
+    ].filter(Boolean);
+
+    if (candidates.length > 0) {
+        return candidates[0];
+    }
+
+    if (process.env.VERCEL_URL) {
+        return `https://${process.env.VERCEL_URL}`;
+    }
+
+    return "http://localhost:3000";
+}
+
+const baseURL = resolveBaseUrl();
+const trustedOrigins = Array.from(
+    new Set(
+        [
+            getOriginFromUrl(baseURL),
+            getOriginFromUrl(process.env.BETTER_AUTH_URL),
+            getOriginFromUrl(process.env.NEXT_PUBLIC_AUTH_BASE_URL),
+            getOriginFromUrl(process.env.URL),
+            getOriginFromUrl(process.env.DEPLOY_PRIME_URL),
+            getOriginFromUrl(process.env.DEPLOY_URL),
+            "http://localhost:3000",
+            ...parseTrustedOrigins(process.env.BETTER_AUTH_TRUSTED_ORIGINS),
+        ].filter(Boolean)
+    )
+);
+
 export const auth = betterAuth({
     database: prismaAdapter(prisma, { provider: "postgresql" }),
     secret: process.env.BETTER_AUTH_SECRET,
-    baseURL: process.env.BETTER_AUTH_URL,
-    trustedOrigins: [
-        "https://unfind.vercel.app",
-        "http://localhost:3000",
-        process.env.BETTER_AUTH_URL || ""
-    ],
+    baseURL,
+    trustedOrigins,
     
     emailAndPassword: {
         enabled: true,
