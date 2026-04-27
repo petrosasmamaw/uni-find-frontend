@@ -8,14 +8,11 @@ import { headers } from 'next/headers';
 export const metadata = { title: 'Found Items' };
 
 export default async function FoundPage() {
-  const headersList = await headers();
-  const cookieHeader = headersList.get('cookie') || '';
-
   let userId = null;
   
   try {
     const session = await auth.api.getSession({
-      headers: { cookie: cookieHeader },
+      headers: await headers(),
     });
     userId = session?.user?.id || null;
   } catch (err) {

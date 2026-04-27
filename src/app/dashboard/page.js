@@ -4,15 +4,12 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
 export default async function DashboardPage() {
-  const headersList = await headers();
-  const cookieHeader = headersList.get('cookie') || '';
-
   let userId = null;
   let userName = null;
   
   try {
     const session = await auth.api.getSession({
-      headers: { cookie: cookieHeader },
+      headers: await headers(),
     });
 
     if (session?.user?.id) {

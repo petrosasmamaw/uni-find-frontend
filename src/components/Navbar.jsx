@@ -4,13 +4,10 @@ import { headers } from "next/headers";
 import { signOutAction } from "@/app/actions/auth-actions";
 
 export default async function Navbar() {
-  const headersList = await headers();
-  const cookieHeader = headersList.get("cookie") || "";
-
   let session = null;
   try {
     session = await auth.api.getSession({
-      headers: { cookie: cookieHeader },
+      headers: await headers(),
     });
   } catch (error) {
     console.error("Failed to resolve auth session in Navbar:", error);
